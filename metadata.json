@@ -1,0 +1,6 @@
+{
+  "name": "WORLD CHAOS — THE LIVING WORLDS",
+  "description": "3D Action-Adventure MVP: Explore The Lost Jungle, harness Shockwave, Gravity Control, and Chaos Shield, survive Chaos Engine events, solve ancient puzzles, and claim the Chaos Core.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
