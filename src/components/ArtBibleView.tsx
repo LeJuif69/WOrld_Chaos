@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Check,
@@ -212,13 +212,26 @@ export const ArtBibleView: React.FC<ArtBibleViewProps> = ({ onBack, onCaptureSna
   const [concepts, setConcepts] = useState<Record<string, string>>({});
   const [capturing, setCapturing] = useState(false);
   const [copiedMsg, setCopiedMsg] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+  const timersRef = useRef<number[]>([]);
+
+  const scheduleTimeout = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(() => {
+      timersRef.current = timersRef.current.filter((t) => t !== id);
+      if (mountedRef.current) fn();
+    }, ms);
+    timersRef.current.push(id);
+  };
 
   const captureAll = () => {
+    for (const id of timersRef.current) window.clearTimeout(id);
+    timersRef.current = [];
     setCapturing(true);
     const envPlates = ART_BIBLE_PLATES.filter((p) => p.snapshotPreset);
     let idx = 0;
 
     const step = () => {
+      if (!mountedRef.current) return;
       if (idx >= envPlates.length) {
         setCapturing(false);
         return;
@@ -227,16 +240,17 @@ export const ArtBibleView: React.FC<ArtBibleViewProps> = ({ onBack, onCaptureSna
       idx += 1;
       if (plate.snapshotPreset) {
         const url = onCaptureSnapshot(plate.snapshotPreset.position, plate.snapshotPreset.lookAt);
-        if (url) {
+        if (url && mountedRef.current) {
           setSnapshots((prev) => ({ ...prev, [plate.id]: url }));
         }
       }
-      window.setTimeout(step, 30);
+      scheduleTimeout(step, 30);
     };
-    window.setTimeout(step, 40);
+    scheduleTimeout(step, 40);
   };
 
   useEffect(() => {
+    mountedRef.current = true;
     const generated: Record<string, string> = {};
     for (const plate of ART_BIBLE_PLATES) {
       if (plate.category === 'environments') {
@@ -246,6 +260,11 @@ export const ArtBibleView: React.FC<ArtBibleViewProps> = ({ onBack, onCaptureSna
     }
     setConcepts(generated);
     captureAll();
+    return () => {
+      mountedRef.current = false;
+      for (const id of timersRef.current) window.clearTimeout(id);
+      timersRef.current = [];
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -259,7 +278,7 @@ export const ArtBibleView: React.FC<ArtBibleViewProps> = ({ onBack, onCaptureSna
 
   const showToast = (msg: string) => {
     setCopiedMsg(msg);
-    window.setTimeout(() => setCopiedMsg(null), 2200);
+    scheduleTimeout(() => setCopiedMsg(null), 2200);
   };
 
   const handleCopyHex = async (hex: string, name: string) => {

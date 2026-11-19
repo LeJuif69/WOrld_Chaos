@@ -3,7 +3,17 @@ import {
   Award,
   BookMarked,
   CheckCircle2,
+  Cloud,
+  Cog,
+  Compass,
+  FlaskConical,
+  Gem,
+  Globe2,
+  Lock,
   MapPin,
+  Play,
+  Power,
+  Rocket,
   RotateCcw,
   Save,
   Skull,
@@ -27,22 +37,44 @@ interface ModalContainerProps {
 }
 
 const ModalFrame: React.FC<ModalContainerProps> = ({ title, onClose, children }) => (
-  <div className="fixed inset-0 z-30 flex items-center justify-center p-4 bg-black/75 pointer-events-auto">
-    <div className="w-full max-w-3xl max-h-[88vh] bg-[#08110D] border border-[#D4AF37]/55 rounded-2xl flex flex-col overflow-hidden shadow-2xl">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#D4AF37]/30 bg-[#0E1B15]">
-        <h2 className="font-display text-lg font-bold text-[#F3F1E8]">{title}</h2>
+  <div className="fixed inset-0 z-30 flex items-center justify-center p-4 bg-black/78 pointer-events-auto">
+    <div className="wc-panel relative w-full max-w-3xl max-h-[88vh] rounded-2xl flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 bg-[#0E1B15]">
+        <div className="flex items-center gap-2.5">
+          <span className="w-2 h-2 rotate-45 bg-[#D4AF37]" aria-hidden="true" />
+          <h2 className="font-display text-lg font-bold text-[#F3F1E8] tracking-wide">{title}</h2>
+        </div>
         <button
           onClick={onClose}
-          className="min-w-[40px] min-h-[40px] rounded-lg bg-[#14261E] hover:bg-[#1E382C] border border-[#D4AF37]/30 text-[#F3F1E8] flex items-center justify-center cursor-pointer"
+          className="min-w-[44px] min-h-[44px] rounded-lg bg-[#14261E] hover:bg-[#1E382C] border border-[#D4AF37]/35 text-[#F3F1E8] flex items-center justify-center cursor-pointer"
           aria-label="Fermer"
         >
           <X className="w-4 h-4 text-[#D4AF37]" />
         </button>
       </div>
+      <div className="wc-divider-gold" />
       <div className="p-5 overflow-y-auto flex-1">{children}</div>
     </div>
   </div>
 );
+
+function renderCategoryEmblem(category: ItemCategory, color: string) {
+  const props = { className: 'w-4 h-4', style: { color } };
+  switch (category) {
+    case 'consumable':
+      return <FlaskConical {...props} />;
+    case 'quest':
+      return <Compass {...props} />;
+    case 'crystal':
+      return <Gem {...props} />;
+    case 'resource':
+      return <Cog {...props} />;
+    case 'chaos_core':
+      return <Award {...props} />;
+    default:
+      return <Sparkles {...props} />;
+  }
+}
 
 export const InventoryModal: React.FC<{
   saveData: SaveDataV1;
@@ -111,10 +143,9 @@ export const InventoryModal: React.FC<{
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span
-                      className="w-3 h-3 rounded-sm shrink-0"
-                      style={{ backgroundColor: def.color }}
-                    />
+                    <span className="w-7 h-7 rounded-lg bg-[#08110D] border border-[#D4AF37]/30 flex items-center justify-center shrink-0">
+                      {renderCategoryEmblem(def.category, def.color)}
+                    </span>
                     <span className="font-mono-num text-xs text-[#D4AF37] font-bold">
                       x{stack.quantity}
                     </span>
@@ -278,7 +309,23 @@ export const WorldMapModal: React.FC<{
   return (
     <ModalFrame title="Carte du Monde 1 — The Lost Jungle" onClose={onClose}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 relative aspect-square bg-[#060D0A] border border-[#D4AF37]/40 rounded-xl overflow-hidden">
+        <div className="md:col-span-2 relative aspect-square bg-[#060D0A] border border-[#D4AF37]/45 rounded-xl overflow-hidden shadow-inner">
+          {/* Topographic coordinate grid & engraved compass rose */}
+          <svg
+            viewBox="0 0 100 100"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            aria-hidden="true"
+          >
+            <path
+              d="M25 0V100 M50 0V100 M75 0V100 M0 25H100 M0 50H100 M0 75H100"
+              stroke="rgba(212,175,55,0.10)"
+              strokeWidth="0.35"
+            />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(20,184,166,0.12)" strokeWidth="0.4" strokeDasharray="1.5 1.5" />
+          </svg>
+          <div className="absolute top-2 right-2.5 text-[10px] font-mono-num font-bold text-[#D4AF37]/75 tracking-widest pointer-events-none">
+            N · E / S · O
+          </div>
           {ZONES.map((z) => {
             const discovered = saveData.worldState.discoveredZones.includes(z.id);
             return (
@@ -456,6 +503,33 @@ export const SettingsModal: React.FC<{
             />
             Afficher les contrôles tactiles à l’écran
           </label>
+          <label className="flex items-center gap-2 text-xs text-[#F3F1E8] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.hapticsEnabled !== false}
+              onChange={(e) => update('hapticsEnabled', e.target.checked)}
+              className="accent-[#D4AF37] w-4 h-4"
+            />
+            Vibrations tactiles en combat (mobile)
+          </label>
+          <label className="flex items-center gap-2 text-xs text-[#F3F1E8] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!settings.tutorialCompleted}
+              onChange={(e) => update('tutorialCompleted', !e.target.checked)}
+              className="accent-[#D4AF37] w-4 h-4"
+            />
+            Afficher le tutoriel de prise en main
+          </label>
+          <label className="flex items-center gap-2 text-xs text-[#F3F1E8] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={Boolean(settings.showPerfOverlay)}
+              onChange={(e) => update('showPerfOverlay', e.target.checked)}
+              className="accent-[#D4AF37] w-4 h-4"
+            />
+            Afficher les métriques de performance en jeu (FPS / Frametime / GPU) [F3]
+          </label>
         </div>
       </div>
     </ModalFrame>
@@ -465,11 +539,22 @@ export const SettingsModal: React.FC<{
 export const PauseModal: React.FC<{
   onResume: () => void;
   onSave: () => void;
+  onOpenCloud: () => void;
   onOpenArtBible: () => void;
+  onOpenStoreKit: () => void;
   onOpenSettings: () => void;
   onTriggerChaos: (t: ChaosEventType) => void;
   onMainMenu: () => void;
-}> = ({ onResume, onSave, onOpenArtBible, onOpenSettings, onTriggerChaos, onMainMenu }) => (
+}> = ({
+  onResume,
+  onSave,
+  onOpenCloud,
+  onOpenArtBible,
+  onOpenStoreKit,
+  onOpenSettings,
+  onTriggerChaos,
+  onMainMenu,
+}) => (
   <ModalFrame title="Jeu en Pause" onClose={onResume}>
     <div className="flex flex-col gap-3 max-w-sm mx-auto">
       <button
@@ -485,14 +570,26 @@ export const PauseModal: React.FC<{
         <Save className="w-4 h-4 text-[#D4AF37]" /> Sauvegarder maintenant
       </button>
       <button
+        onClick={onOpenCloud}
+        className="min-h-[44px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#14B8A6]/45 text-[#F3F1E8] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <Cloud className="w-4 h-4 text-[#14B8A6]" /> Sauvegarde Cloud &amp; Classement
+      </button>
+      <button
         onClick={onOpenArtBible}
-        className="min-h-[46px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#14B8A6]/45 text-[#14B8A6] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+        className="min-h-[44px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#14B8A6]/45 text-[#14B8A6] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
       >
         <BookMarked className="w-4 h-4" /> Consulter la Bible Graphique V1.0
       </button>
       <button
+        onClick={onOpenStoreKit}
+        className="min-h-[44px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#D4AF37]/40 text-[#F2CF66] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <Rocket className="w-4 h-4 text-[#D4AF37]" /> Kit Publication Stores
+      </button>
+      <button
         onClick={onOpenSettings}
-        className="min-h-[46px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#D4AF37]/30 text-[#F3F1E8] font-semibold text-sm cursor-pointer"
+        className="min-h-[44px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#D4AF37]/30 text-[#F3F1E8] font-semibold text-sm cursor-pointer"
       >
         Audio, Graphismes &amp; Caméra
       </button>
@@ -540,33 +637,36 @@ export const VictoryScreen: React.FC<{
   onContinueExploring: () => void;
   onMainMenu: () => void;
 }> = ({ saveData, onContinueExploring, onMainMenu }) => (
-  <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/82 pointer-events-auto">
-    <div className="max-w-lg w-full bg-[#08110D] border border-[#D4AF37] rounded-2xl p-6 text-center shadow-2xl">
-      <Award className="w-12 h-12 text-[#D4AF37] mx-auto" />
-      <h2 className="font-display text-3xl font-extrabold text-[#F3F1E8] mt-3">
+  <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/84 pointer-events-auto">
+    <div className="wc-panel max-w-lg w-full rounded-2xl p-6 text-center">
+      <div className="relative w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-[#14261E] border border-[#D4AF37]/60 gold-glow">
+        <Award className="w-9 h-9 text-[#F2CF66]" />
+      </div>
+      <h2 className="font-display text-3xl font-extrabold text-[#F3F1E8] mt-4 text-balance">
         JUNGLE CHAOS CORE CONQUIS
       </h2>
-      <p className="text-sm text-[#9EB3A8] mt-2 leading-relaxed">
+      <div className="wc-divider-gold my-3" />
+      <p className="text-sm text-[#9EB3A8] leading-relaxed">
         Vous avez vaincu Krakoss et stabilisé le Monde 1 : The Lost Jungle. La voie vers Sky Islands,
         The Lost City, Deep Blue et The Final Chaos est ouverte.
       </p>
 
       <div className="grid grid-cols-3 gap-3 my-5 text-xs">
-        <div className="p-3 rounded-xl bg-[#0E1B15] border border-[#D4AF37]/25">
+        <div className="p-3 rounded-xl bg-[#0E1B15] border border-[#D4AF37]/30">
           <div className="text-[#9EB3A8]">Zones</div>
-          <div className="font-mono-num text-lg font-bold text-[#D4AF37]">
+          <div className="font-mono-num text-lg font-bold text-[#F2CF66]">
             {saveData.worldState.discoveredZones.length}/10
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-[#0E1B15] border border-[#D4AF37]/25">
+        <div className="p-3 rounded-xl bg-[#0E1B15] border border-[#D4AF37]/30">
           <div className="text-[#9EB3A8]">Ennemis</div>
           <div className="font-mono-num text-lg font-bold text-[#F3F1E8]">
             {saveData.enemiesDefeatedCount}
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-[#0E1B15] border border-[#D4AF37]/25">
+        <div className="p-3 rounded-xl bg-[#0E1B15] border border-[#D4AF37]/30">
           <div className="text-[#9EB3A8]">Énigmes</div>
-          <div className="font-mono-num text-lg font-bold text-[#14B8A6]">
+          <div className="font-mono-num text-lg font-bold text-[#2DD4BF]">
             {saveData.worldState.solvedPuzzles.length}/5
           </div>
         </div>
@@ -575,7 +675,7 @@ export const VictoryScreen: React.FC<{
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={onContinueExploring}
-          className="min-h-[46px] px-5 rounded-xl bg-[#D4AF37] hover:bg-[#F2CF66] text-[#08110D] font-bold text-sm cursor-pointer"
+          className="wc-btn-gold min-h-[46px] px-5 rounded-xl font-bold text-sm cursor-pointer"
         >
           Continuer l’exploration
         </button>
@@ -594,19 +694,22 @@ export const DefeatScreen: React.FC<{
   onRespawn: () => void;
   onMainMenu: () => void;
 }> = ({ onRespawn, onMainMenu }) => (
-  <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/84 pointer-events-auto">
-    <div className="max-w-md w-full bg-[#14090C] border border-[#DC2626]/65 rounded-2xl p-6 text-center shadow-2xl">
-      <Skull className="w-12 h-12 text-[#DC2626] mx-auto" />
-      <h2 className="font-display text-2xl font-extrabold text-[#F3F1E8] mt-3">
+  <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/86 pointer-events-auto">
+    <div className="wc-panel-crimson max-w-md w-full rounded-2xl p-6 text-center">
+      <div className="w-16 h-16 mx-auto flex items-center justify-center rounded-full bg-[#240B10] border border-[#DC2626]/60">
+        <Skull className="w-9 h-9 text-[#F87171]" />
+      </div>
+      <h2 className="font-display text-2xl font-extrabold text-[#F3F1E8] mt-4">
         TOMBÉ DANS LA JUNGLE
       </h2>
-      <p className="text-xs sm:text-sm text-[#9EB3A8] mt-2">
+      <div className="wc-divider-gold my-3" />
+      <p className="text-xs sm:text-sm text-[#9EB3A8]">
         Le Chaos vous a submergé, mais la stèle du Campement préserve votre progression.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center mt-5">
         <button
           onClick={onRespawn}
-          className="min-h-[46px] px-5 rounded-xl bg-[#DC2626] hover:bg-[#EF4444] text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
+          className="min-h-[46px] px-5 rounded-xl bg-[#DC2626] hover:bg-[#EF4444] border border-[#F2CF66]/40 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
         >
           <RotateCcw className="w-4 h-4" /> Réapparaître au Camp
         </button>
@@ -620,3 +723,210 @@ export const DefeatScreen: React.FC<{
     </div>
   </div>
 );
+
+interface WorldEntry {
+  id: string;
+  number: string;
+  title: string;
+  subtitle: string;
+  playable: boolean;
+}
+
+const WORLDS_CATALOG: WorldEntry[] = [
+  {
+    id: 'lost_jungle',
+    number: 'MONDE 01',
+    title: 'The Lost Jungle',
+    subtitle: '10 zones · Campement, Temple Oublié, Sanctuaire Sacré et Arène de Krakoss.',
+    playable: true,
+  },
+  {
+    id: 'sky_islands',
+    number: 'MONDE 02',
+    title: 'Sky Islands',
+    subtitle: 'Archipels célestes et courants gravitationnels — Chapitre II.',
+    playable: false,
+  },
+  {
+    id: 'lost_city',
+    number: 'MONDE 03',
+    title: 'The Lost City',
+    subtitle: 'Cité mécanique engloutie sous les sables dorés — Chapitre III.',
+    playable: false,
+  },
+  {
+    id: 'deep_blue',
+    number: 'MONDE 04',
+    title: 'Deep Blue',
+    subtitle: 'Abysses bioluminescents et sanctuaires coralliens — Chapitre IV.',
+    playable: false,
+  },
+  {
+    id: 'final_chaos',
+    number: 'MONDE 05',
+    title: 'The Final Chaos',
+    subtitle: 'Cœur du Chaos primordial — Chapitre V.',
+    playable: false,
+  },
+];
+
+export const WorldSelectModal: React.FC<{
+  hasSave: boolean;
+  chaosCoreObtained: boolean;
+  onPlayWorld1: () => void;
+  onClose: () => void;
+}> = ({ hasSave, chaosCoreObtained, onPlayWorld1, onClose }) => (
+  <ModalFrame title="Sélection des Mondes" onClose={onClose}>
+    <div className="space-y-3">
+      <p className="text-xs text-[#9EB3A8] leading-relaxed">
+        Progression de l’univers <strong className="text-[#F2CF66]">WORLD CHAOS</strong> · Monde 1 jouable immédiatement.
+      </p>
+      <div className="space-y-2.5">
+        {WORLDS_CATALOG.map((w) => {
+          const unlockedByCore = !w.playable && w.id === 'sky_islands' && chaosCoreObtained;
+          return (
+            <div
+              key={w.id}
+              className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                w.playable
+                  ? 'bg-[#0E1B15] border-[#D4AF37]/55'
+                  : 'bg-[#09120E] border-white/10 opacity-80'
+              }`}
+            >
+              <div className="space-y-1 min-w-0">
+                <div className="flex items-center gap-2 text-[11px] font-mono-num font-semibold tracking-wider text-[#D4AF37]">
+                  <Globe2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>{w.number}</span>
+                  <span className="text-[#9EB3A8]">·</span>
+                  <span className={w.playable ? 'text-[#2DD4BF]' : 'text-[#9EB3A8]'}>
+                    {w.playable
+                      ? 'Jouable'
+                      : unlockedByCore
+                      ? 'Chaos Core conquis · Bientôt disponible'
+                      : 'Verrouillé · Chapitre futur'}
+                  </span>
+                </div>
+                <h3 className="font-display text-base font-bold text-[#F3F1E8]">{w.title}</h3>
+                <p className="text-xs text-[#9EB3A8]">{w.subtitle}</p>
+              </div>
+
+              {w.playable ? (
+                <button
+                  onClick={onPlayWorld1}
+                  className="wc-btn-gold min-h-[44px] px-5 rounded-lg text-xs font-bold flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  {hasSave ? 'Continuer' : 'Explorer'}
+                </button>
+              ) : (
+                <div className="min-h-[44px] px-4 rounded-lg bg-[#08110D] border border-white/10 text-[#9EB3A8] text-xs font-medium flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0">
+                  <Lock className="w-3.5 h-3.5" />
+                  Bientôt
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </ModalFrame>
+);
+
+export const CreditsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+  <ModalFrame title="Crédits — WORLD CHAOS" onClose={onClose}>
+    <div className="space-y-4 text-xs text-[#9EB3A8]">
+      <div className="p-4 rounded-xl bg-[#0E1B15] border border-[#D4AF37]/35">
+        <div className="font-display text-lg font-extrabold text-[#F3F1E8]">WORLD CHAOS</div>
+        <div className="font-display text-xs font-semibold text-[#F2CF66] tracking-[0.16em] mt-0.5">
+          THE LIVING WORLDS · MONDE 1 : THE LOST JUNGLE
+        </div>
+        <div className="wc-divider-gold my-3" />
+        <p className="leading-relaxed">
+          Expérience d’action-aventure 3D en temps réel combinant rendu PBR procédural, éclairage
+          cinématographique, combat dynamique, énigmes environnementales et anomalies du Chaos.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="p-3.5 rounded-xl bg-[#0E1B15] border border-white/10 space-y-1">
+          <div className="text-[#D4AF37] font-semibold">Rendu 3D &amp; Direction Visuelle</div>
+          <div className="text-[#F3F1E8]">Three.js WebGL2 · ACES Filmic · PBR &amp; Shaders GLSL</div>
+        </div>
+        <div className="p-3.5 rounded-xl bg-[#0E1B15] border border-white/10 space-y-1">
+          <div className="text-[#14B8A6] font-semibold">Audio &amp; Design Sonore</div>
+          <div className="text-[#F3F1E8]">Synthèse adaptative Web Audio API multi-ambiances</div>
+        </div>
+        <div className="p-3.5 rounded-xl bg-[#0E1B15] border border-white/10 space-y-1">
+          <div className="text-[#D4AF37] font-semibold">Systèmes &amp; Sauvegarde</div>
+          <div className="text-[#F3F1E8]">Sauvegarde locale V1, PWA hors ligne &amp; Firebase Cloud</div>
+        </div>
+        <div className="p-3.5 rounded-xl bg-[#0E1B15] border border-white/10 space-y-1">
+          <div className="text-[#14B8A6] font-semibold">Ergonomie Multi-Écrans</div>
+          <div className="text-[#F3F1E8]">Clavier/Souris Desktop &amp; Contrôles Tactiles Android Paysage</div>
+        </div>
+      </div>
+
+      <div className="flex justify-end pt-1">
+        <button
+          onClick={onClose}
+          className="wc-btn-gold min-h-[44px] px-5 rounded-lg text-xs font-bold cursor-pointer whitespace-nowrap"
+        >
+          Retour au Menu
+        </button>
+      </div>
+    </div>
+  </ModalFrame>
+);
+
+export const ExitConfirmModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [closeBlocked, setCloseBlocked] = useState(false);
+
+  const handleConfirmExit = () => {
+    window.close();
+    setCloseBlocked(true);
+  };
+
+  return (
+    <ModalFrame title="Quitter WORLD CHAOS" onClose={onClose}>
+      <div className="space-y-4 text-center py-2">
+        <div className="w-12 h-12 mx-auto rounded-full bg-[#14261E] border border-[#D4AF37]/45 flex items-center justify-center">
+          <Power className="w-6 h-6 text-[#D4AF37]" />
+        </div>
+        {closeBlocked ? (
+          <div className="space-y-2 max-w-md mx-auto">
+            <h3 className="font-display text-base font-bold text-[#F3F1E8]">Session terminée</h3>
+            <p className="text-xs text-[#9EB3A8] leading-relaxed">
+              Votre navigateur empêche la fermeture automatique de cet onglet. Vous pouvez fermer la
+              fenêtre manuellement en toute sécurité : votre progression locale reste sauvegardée.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-w-md mx-auto">
+            <h3 className="font-display text-base font-bold text-[#F3F1E8]">
+              Souhaitez-vous quitter l’aventure ?
+            </h3>
+            <p className="text-xs text-[#9EB3A8] leading-relaxed">
+              Toute progression sauvegardée localement ou sur le Cloud est conservée.
+            </p>
+          </div>
+        )}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          {!closeBlocked && (
+            <button
+              onClick={handleConfirmExit}
+              className="min-h-[44px] px-5 rounded-lg bg-[#240B10] hover:bg-[#361017] border border-[#DC2626]/55 text-rose-200 font-semibold text-xs cursor-pointer whitespace-nowrap"
+            >
+              Confirmer la fermeture
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="wc-btn-gold min-h-[44px] px-5 rounded-lg font-bold text-xs cursor-pointer whitespace-nowrap"
+          >
+            Revenir au menu
+          </button>
+        </div>
+      </div>
+    </ModalFrame>
+  );
+};

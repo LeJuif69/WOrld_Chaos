@@ -1,3 +1,5 @@
+import type { PerfStats } from './performanceMonitor';
+
 export type ZoneId =
   | 'arrival'
   | 'camp'
@@ -59,7 +61,7 @@ export interface ZoneDef {
   radius: number;
   fogColor: string;
   skyColor: string;
-  ambientMood: 'jungle' | 'camp' | 'river' | 'cave' | 'ruins' | 'chaos' | 'boss';
+  ambientMood: 'jungle' | 'camp' | 'river' | 'cave' | 'ruins' | 'temple' | 'chaos' | 'boss';
   description: string;
 }
 
@@ -175,6 +177,9 @@ export interface GameSettings {
   invertY: boolean;
   cameraDistance: number;
   showTouchControls: boolean;
+  hapticsEnabled?: boolean;
+  tutorialCompleted?: boolean;
+  showPerfOverlay?: boolean;
 }
 
 export interface WorldStateData {
@@ -247,4 +252,5 @@ export interface HUDStateSnapshot {
   discoveryBanner: { title: string; subtitle: string } | null;
   activeMainQuestTitle: string | null;
   activeMainQuestStep: string | null;
+  perfStats?: PerfStats;
 }

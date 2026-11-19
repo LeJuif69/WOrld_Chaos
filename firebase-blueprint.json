@@ -1,0 +1,183 @@
+{
+  "entities": {
+    "UserSave": {
+      "title": "UserSave",
+      "description": "Cloud-synchronized World 1 explorer save state owned strictly by the authenticated player.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Authenticated Firebase UID owning this save.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "version": {
+          "type": "integer",
+          "description": "Save schema version (1)."
+        },
+        "savedAt": {
+          "type": "string",
+          "description": "Client ISO timestamp label.",
+          "minLength": 10,
+          "maxLength": 64
+        },
+        "playTimeSeconds": {
+          "type": "number",
+          "description": "Total active play time in seconds."
+        },
+        "playerPosition": {
+          "type": "array",
+          "description": "3-element [x, y, z] coordinates in World 1."
+        },
+        "playerYaw": {
+          "type": "number",
+          "description": "Facing yaw angle in radians."
+        },
+        "hp": {
+          "type": "number",
+          "description": "Current explorer health points."
+        },
+        "maxHp": {
+          "type": "number",
+          "description": "Maximum explorer health points."
+        },
+        "chaosEnergy": {
+          "type": "number",
+          "description": "Current Chaos energy."
+        },
+        "maxChaosEnergy": {
+          "type": "number",
+          "description": "Maximum Chaos energy."
+        },
+        "xp": {
+          "type": "number",
+          "description": "Total experience points."
+        },
+        "level": {
+          "type": "integer",
+          "description": "Explorer level (1-99)."
+        },
+        "enemiesDefeatedCount": {
+          "type": "integer",
+          "description": "Total defeated enemies."
+        },
+        "chaosEventsSurvived": {
+          "type": "integer",
+          "description": "Total survived Chaos Engine events."
+        },
+        "inventory": {
+          "type": "array",
+          "description": "Bounded list of item stacks."
+        },
+        "quests": {
+          "type": "object",
+          "description": "Quest progress map keyed by quest ID."
+        },
+        "worldState": {
+          "type": "object",
+          "description": "World flags, discovered zones, unlocked abilities, solved puzzles."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp enforced via request.time."
+        }
+      },
+      "required": [
+        "ownerId",
+        "version",
+        "savedAt",
+        "playTimeSeconds",
+        "playerPosition",
+        "playerYaw",
+        "hp",
+        "maxHp",
+        "chaosEnergy",
+        "maxChaosEnergy",
+        "xp",
+        "level",
+        "enemiesDefeatedCount",
+        "chaosEventsSurvived",
+        "inventory",
+        "quests",
+        "worldState",
+        "updatedAt"
+      ]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Publicly readable non-PII mastery entry for World 1 explorers.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Authenticated Firebase UID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Public explorer pseudonym (max 32 chars).",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "level": {
+          "type": "integer",
+          "description": "Explorer level (1-99)."
+        },
+        "xp": {
+          "type": "number",
+          "description": "Total experience points."
+        },
+        "bossDefeated": {
+          "type": "boolean",
+          "description": "Whether Krakoss was defeated."
+        },
+        "chaosCoreObtained": {
+          "type": "boolean",
+          "description": "Whether the Jungle Chaos Core was claimed."
+        },
+        "playTimeSeconds": {
+          "type": "number",
+          "description": "Total play time in seconds."
+        },
+        "enemiesDefeatedCount": {
+          "type": "integer",
+          "description": "Total defeated enemies."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp enforced via request.time."
+        }
+      },
+      "required": [
+        "ownerId",
+        "displayName",
+        "level",
+        "xp",
+        "bossDefeated",
+        "chaosCoreObtained",
+        "playTimeSeconds",
+        "enemiesDefeatedCount",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/saves/{saveId}": {
+      "schema": {
+        "$ref": "#/entities/UserSave"
+      },
+      "description": "Private player cloud save document isolated by owner UID."
+    },
+    "/leaderboard/{userId}": {
+      "schema": {
+        "$ref": "#/entities/LeaderboardEntry"
+      },
+      "description": "Public World 1 explorer mastery leaderboard (zero PII)."
+    }
+  }
+}

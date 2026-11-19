@@ -26,29 +26,31 @@ export const DialogueModal: React.FC<DialogueModalProps> = ({ npc, onChoice, onC
   };
 
   return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center p-4 sm:p-6 bg-black/60 pointer-events-auto">
-      <div className="w-full max-w-2xl bg-[#08110D] border border-[#D4AF37]/55 rounded-2xl p-5 sm:p-6 shadow-2xl">
-        <div className="flex items-center justify-between gap-4 pb-3 border-b border-[#D4AF37]/25">
+    <div className="fixed inset-0 z-30 flex items-end justify-center p-4 sm:p-6 bg-black/62 pointer-events-auto">
+      <div className="wc-panel w-full max-w-2xl rounded-2xl p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-4 pb-3">
           <div className="flex items-center gap-3">
             <div
-              className="w-9 h-9 rounded-lg border border-[#D4AF37]/50 flex items-center justify-center text-white"
+              className="w-10 h-10 rounded-lg border border-[#D4AF37]/65 flex items-center justify-center text-white shadow-inner"
               style={{ backgroundColor: npc.cloakColor }}
             >
               <MessageSquare className="w-4 h-4" />
             </div>
             <div>
               <h3 className="font-display text-base font-bold text-[#F3F1E8]">{npc.name}</h3>
-              <p className="text-xs text-[#D4AF37]">{npc.role}</p>
+              <p className="text-xs text-[#D4AF37] font-medium">{npc.role}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="min-w-[40px] min-h-[40px] rounded-lg bg-[#0E1B15] hover:bg-[#162B22] border border-[#D4AF37]/30 text-[#F3F1E8] flex items-center justify-center cursor-pointer"
+            className="min-w-[44px] min-h-[44px] rounded-lg bg-[#0E1B15] hover:bg-[#162B22] border border-[#D4AF37]/35 text-[#F3F1E8] flex items-center justify-center cursor-pointer"
             aria-label="Fermer le dialogue"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-[#D4AF37]" />
           </button>
         </div>
+
+        <div className="wc-divider-gold" />
 
         <p className="mt-4 text-sm sm:text-base text-[#F3F1E8]/95 leading-relaxed">{node.text}</p>
 

@@ -1,3 +1,4 @@
+import { detectTouchCapableDevice } from './gameLogic';
 import { GameSettings, QuestProgress, SaveDataV1 } from './types';
 import { QUESTS } from './worldData';
 
@@ -13,8 +14,16 @@ export const DEFAULT_SETTINGS: GameSettings = {
   cameraSensitivity: 1.0,
   invertY: false,
   cameraDistance: 8.5,
-  showTouchControls: true,
+  showTouchControls: detectTouchCapableDevice(),
+  hapticsEnabled: true,
+  tutorialCompleted: false,
+  showPerfOverlay: false,
 };
+
+function clampFinite(val: unknown, fallback: number, min: number, max: number): number {
+  if (typeof val !== 'number' || !Number.isFinite(val)) return fallback;
+  return Math.max(min, Math.min(max, val));
+}
 
 export function createInitialQuests(): Record<string, QuestProgress> {
   const quests: Record<string, QuestProgress> = {};
@@ -98,9 +107,26 @@ export function loadGame(): SaveDataV1 | null {
       return null;
     }
     const base = createNewSaveData();
+    const maxHp = clampFinite(parsed.maxHp, base.maxHp, 50, 1000);
+    const maxChaosEnergy = clampFinite(parsed.maxChaosEnergy, base.maxChaosEnergy, 50, 1000);
     return {
       ...base,
       ...parsed,
+      playTimeSeconds: clampFinite(parsed.playTimeSeconds, base.playTimeSeconds, 0, 10000000),
+      playerPosition: [
+        clampFinite(parsed.playerPosition[0], base.playerPosition[0], -200, 200),
+        clampFinite(parsed.playerPosition[1], base.playerPosition[1], -50, 200),
+        clampFinite(parsed.playerPosition[2], base.playerPosition[2], -200, 200),
+      ],
+      playerYaw: clampFinite(parsed.playerYaw, base.playerYaw, -10, 10),
+      maxHp,
+      hp: clampFinite(parsed.hp, maxHp, 0, maxHp),
+      maxChaosEnergy,
+      chaosEnergy: clampFinite(parsed.chaosEnergy, maxChaosEnergy, 0, maxChaosEnergy),
+      xp: clampFinite(parsed.xp, base.xp, 0, 10000000),
+      level: Math.round(clampFinite(parsed.level, base.level, 1, 99)),
+      enemiesDefeatedCount: Math.round(clampFinite(parsed.enemiesDefeatedCount, 0, 0, 1000000)),
+      chaosEventsSurvived: Math.round(clampFinite(parsed.chaosEventsSurvived, 0, 0, 1000000)),
       worldState: {
         ...base.worldState,
         ...parsed.worldState,

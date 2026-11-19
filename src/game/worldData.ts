@@ -84,7 +84,7 @@ export const ZONES: ZoneDef[] = [
     radius: 26,
     fogColor: '#28332b',
     skyColor: '#6b8577',
-    ambientMood: 'ruins',
+    ambientMood: 'temple',
     description: 'A stepped pyramid whose gravity conduits still hum with pre-Chaos engineering.',
   },
   {
@@ -117,7 +117,7 @@ export const ZONES: ZoneDef[] = [
     radius: 20,
     fogColor: '#1b3b36',
     skyColor: '#54a696',
-    ambientMood: 'ruins',
+    ambientMood: 'temple',
     description: 'A hidden emerald sanctuary sealed behind resonant crystal brambles.',
   },
 ];
