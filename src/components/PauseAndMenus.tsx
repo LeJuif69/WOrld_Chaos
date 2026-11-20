@@ -530,6 +530,15 @@ export const SettingsModal: React.FC<{
             />
             Afficher les métriques de performance en jeu (FPS / Frametime / GPU) [F3]
           </label>
+          <label className="flex items-center gap-2 text-xs text-[#F3F1E8] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={Boolean(settings.showCollisionDebug)}
+              onChange={(e) => update('showCollisionDebug', e.target.checked)}
+              className="accent-[#D4AF37] w-4 h-4"
+            />
+            Mode Débogage 3D des Collisions (Visualiser les Wireframes)
+          </label>
         </div>
       </div>
     </ModalFrame>

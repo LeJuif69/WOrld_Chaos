@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   hapticsEnabled: true,
   tutorialCompleted: false,
   showPerfOverlay: false,
+  showCollisionDebug: false,
 };
 
 function clampFinite(val: unknown, fallback: number, min: number, max: number): number {

@@ -180,6 +180,7 @@ export interface GameSettings {
   hapticsEnabled?: boolean;
   tutorialCompleted?: boolean;
   showPerfOverlay?: boolean;
+  showCollisionDebug?: boolean;
 }
 
 export interface WorldStateData {

@@ -39,6 +39,11 @@ export const STATIC_OBSTACLES: SolidColliderDef[] = [
   { id: 'ruins_pillar_3', x: -38, z: -20, radius: 1.8, layer: CollisionLayer.WORLD_SOLID },
   // Camp Outpost center
   { id: 'camp_center', x: 0, z: 44, radius: 5.2, layer: CollisionLayer.WORLD_SOLID },
+  // Major natural and architectural landmark obstacles
+  { id: 'boss_arena_rim', x: 0, z: -82, radius: 22, minY: 0, maxY: 10, layer: CollisionLayer.WORLD_SOLID },
+  { id: 'chaos_monolith_core', x: 44, z: -46, radius: 9.5, minY: 0, maxY: 8, layer: CollisionLayer.WORLD_SOLID },
+  { id: 'sanctuary_perimeter', x: -66, z: -64, radius: 11, minY: 0, maxY: 7, layer: CollisionLayer.WORLD_SOLID },
+  { id: 'skiff_wreckage', x: 0, z: 82, radius: 5.5, minY: 0, maxY: 5, layer: CollisionLayer.WORLD_SOLID },
 ];
 
 export function registerDynamicObstacles(obstacles: SolidColliderDef[]) {

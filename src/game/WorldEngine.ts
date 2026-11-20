@@ -18,7 +18,7 @@ import {
 } from './models';
 import { PerformanceMonitor } from './performanceMonitor';
 import { applyLevelUps, isBlockedByWorldBarrier } from './gameLogic';
-import { checkEnvironmentCollision, registerDynamicObstacles, SolidColliderDef } from './physics';
+import { checkEnvironmentCollision, registerDynamicObstacles, SolidColliderDef, STATIC_OBSTACLES } from './physics';
 import { createNewSaveData, saveGame } from './saveSystem';
 import {
   createBarkNormalTexture,
@@ -395,6 +395,8 @@ export class WorldEngine {
   private jungleDustMotes?: THREE.Points;
   private creepingMistPatches: THREE.Mesh[] = [];
   private cliffOutcrops: THREE.Group[] = [];
+  private collisionDebugGroup: THREE.Group | null = null;
+  private playerDebugMesh: THREE.Mesh | null = null;
 
   constructor(container: HTMLElement, settings: GameSettings, callbacks: EngineCallbacks) {
     this.container = container;
@@ -1774,6 +1776,59 @@ transformed.y += sin(uWindTime * 2.7 + position.x * 1.9 + foliageOrigin.z) * (uW
         radius: 0.9 * s,
       });
     });
+
+    // Biome Rocks (85 rocks across jungle, cave, river, and camp)
+    for (let i = 0; i < 85; i++) {
+      const a = i * 1.73;
+      const r = 14 + ((i * 53) % 92);
+      const rx = Math.cos(a) * r;
+      const rz = Math.sin(a) * r;
+      const s = 0.7 + ((i * 19) % 65) / 100;
+      dynamicColliders.push({
+        id: `biome_rock_${i}`,
+        x: rx,
+        z: rz,
+        radius: 1.12 * s * 1.15,
+        minY: 0,
+        maxY: 3.5,
+      });
+    }
+
+    // Chaos Zone Obsidian Spires (14 spires)
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2;
+      const rad = 12 + (i % 3) * 4.5;
+      const sx = 44 + Math.cos(a) * rad;
+      const sz = -46 + Math.sin(a) * rad;
+      dynamicColliders.push({
+        id: `obsidian_spire_${i}`,
+        x: sx,
+        z: sz,
+        radius: 0.9,
+        minY: 0,
+        maxY: 4.5,
+      });
+    }
+
+    // Ancient Ruins Pillars
+    const ruinsPillars: Array<[number, number]> = [
+      [-38, -16],
+      [-22, -16],
+      [-38, -32],
+      [-22, -32],
+      [-30, -14],
+    ];
+    ruinsPillars.forEach(([px, pz], idx) => {
+      dynamicColliders.push({
+        id: `ruins_pillar_extra_${idx}`,
+        x: px,
+        z: pz,
+        radius: 1.1,
+        minY: 0,
+        maxY: 6.0,
+      });
+    });
+
     registerDynamicObstacles(dynamicColliders);
 
     const palmTrunkParts: THREE.BufferGeometry[] = [];
@@ -2506,6 +2561,47 @@ transformed.y += sin(uWindTime * 2.7 + position.x * 1.9 + foliageOrigin.z) * (uW
     this.settings = next;
     this.audio.applySettings(next);
     this.applyGraphicsQuality();
+    this.syncCollisionDebugVisualizer();
+  }
+
+  private syncCollisionDebugVisualizer(): void {
+    const show = Boolean(this.settings.showCollisionDebug);
+    if (!show) {
+      if (this.collisionDebugGroup) {
+        this.collisionDebugGroup.visible = false;
+      }
+      return;
+    }
+
+    if (!this.collisionDebugGroup) {
+      this.collisionDebugGroup = new THREE.Group();
+      this.collisionDebugGroup.name = 'CollisionDebugVisualizer';
+
+      // 1. Player Capsule/Cylinder wireframe mesh (Cyan)
+      const pGeo = new THREE.CylinderGeometry(0.42, 0.42, 1.8, 12);
+      pGeo.translate(0, 0.9, 0);
+      const pMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true });
+      this.playerDebugMesh = new THREE.Mesh(pGeo, pMat);
+      this.collisionDebugGroup.add(this.playerDebugMesh);
+
+      // 2. Obstacles wireframe meshes (Magenta / Red)
+      const obsMat = new THREE.MeshBasicMaterial({ color: 0xf43f5e, wireframe: true });
+      for (const obs of STATIC_OBSTACLES) {
+        const height = obs.maxY !== undefined && obs.minY !== undefined ? Math.max(2.0, obs.maxY - obs.minY) : 6.0;
+        const oGeo = new THREE.CylinderGeometry(obs.radius, obs.radius, height, 12);
+        const oY = obs.minY !== undefined ? obs.minY + height / 2 : getTerrainHeight(obs.x, obs.z) + height / 2;
+        oGeo.translate(obs.x, oY, obs.z);
+        const oMesh = new THREE.Mesh(oGeo, obsMat);
+        this.collisionDebugGroup.add(oMesh);
+      }
+
+      this.scene.add(this.collisionDebugGroup);
+    }
+
+    this.collisionDebugGroup.visible = true;
+    if (this.playerDebugMesh) {
+      this.playerDebugMesh.position.copy(this.playerPos);
+    }
   }
 
   public getSaveSnapshot(): SaveDataV1 {
@@ -3594,34 +3690,45 @@ transformed.y += sin(uWindTime * 2.7 + position.x * 1.9 + foliageOrigin.z) * (uW
     }
     this.playerVel.y += gravity * dt;
 
-    // Proposed next position & solid environment obstacle collisions
-    const nextX = THREE.MathUtils.clamp(this.playerPos.x + this.playerVel.x * dt, -WORLD_HALF_SIZE, WORLD_HALF_SIZE);
-    const nextZ = THREE.MathUtils.clamp(this.playerPos.z + this.playerVel.z * dt, -WORLD_HALF_SIZE, WORLD_HALF_SIZE);
-
+    // Sub-stepped movement integration (4 sub-steps per frame) to prevent any tunneling through obstacles
+    const subSteps = 4;
+    const subDt = dt / subSteps;
     const isBlocked = (x: number, z: number) =>
       checkEnvironmentCollision(x, z, this.playerPos.y, this.saveData.worldState);
 
-    const directBlocked = isBlocked(nextX, nextZ);
-    const barrierHit = isBlockedByWorldBarrier(nextX, nextZ, this.saveData.worldState);
+    let hitAnyBarrier = false;
+    for (let step = 0; step < subSteps; step++) {
+      const stepVelX = this.playerVel.x * subDt;
+      const stepVelZ = this.playerVel.z * subDt;
 
-    if (!directBlocked) {
-      this.playerPos.x = nextX;
-      this.playerPos.z = nextZ;
-    } else {
-      // Axis sliding against obstacles/barriers
-      if (!isBlocked(nextX, this.playerPos.z)) {
-        this.playerPos.x = nextX;
-      } else if (!isBlocked(this.playerPos.x, nextZ)) {
-        this.playerPos.z = nextZ;
+      const targetX = THREE.MathUtils.clamp(this.playerPos.x + stepVelX, -WORLD_HALF_SIZE, WORLD_HALF_SIZE);
+      const targetZ = THREE.MathUtils.clamp(this.playerPos.z + stepVelZ, -WORLD_HALF_SIZE, WORLD_HALF_SIZE);
+
+      const directBlocked = isBlocked(targetX, targetZ);
+      const barrierHit = isBlockedByWorldBarrier(targetX, targetZ, this.saveData.worldState);
+      if (barrierHit !== null) hitAnyBarrier = true;
+
+      if (!directBlocked) {
+        this.playerPos.x = targetX;
+        this.playerPos.z = targetZ;
+      } else {
+        // Axis sliding against obstacles/barriers per sub-step
+        if (!isBlocked(targetX, this.playerPos.z)) {
+          this.playerPos.x = targetX;
+        } else if (!isBlocked(this.playerPos.x, targetZ)) {
+          this.playerPos.z = targetZ;
+        }
       }
-      if (barrierHit && this.barrierToastCooldown <= 0) {
-        this.barrierToastCooldown = 2.5;
-        this.showSaveToast(
-          barrierHit === 'boss'
-            ? 'Boss Arena sealed — stabilize the Chaos Obelisk first.'
-            : 'Crystal Brambles block the way — shatter them with Shockwave.'
-        );
-      }
+    }
+
+    if (hitAnyBarrier && this.barrierToastCooldown <= 0) {
+      this.barrierToastCooldown = 2.5;
+      const sampleBarrier = isBlockedByWorldBarrier(this.playerPos.x, this.playerPos.z, this.saveData.worldState);
+      this.showSaveToast(
+        sampleBarrier === 'boss'
+          ? 'Boss Arena sealed — stabilize the Chaos Obelisk first.'
+          : 'Crystal Brambles block the way — shatter them with Shockwave.'
+      );
     }
 
     this.playerPos.y += this.playerVel.y * dt;
@@ -3684,6 +3791,8 @@ transformed.y += sin(uWindTime * 2.7 + position.x * 1.9 + foliageOrigin.z) * (uW
     this.explorer.shieldDome.rotation.y += dt * 1.4;
     this.explorer.gravityAura.visible = this.gravityControlTimer > 0;
     this.explorer.gravityAura.rotation.z += dt * 3.0;
+
+    this.syncCollisionDebugVisualizer();
 
     const horizSpeed = Math.hypot(this.playerVel.x, this.playerVel.z);
     const inAir = !this.onGround;
