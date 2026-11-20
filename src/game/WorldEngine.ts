@@ -18,7 +18,7 @@ import {
 } from './models';
 import { PerformanceMonitor } from './performanceMonitor';
 import { applyLevelUps, isBlockedByWorldBarrier } from './gameLogic';
-import { checkEnvironmentCollision } from './physics';
+import { checkEnvironmentCollision, registerDynamicObstacles, SolidColliderDef } from './physics';
 import { createNewSaveData, saveGame } from './saveSystem';
 import {
   createBarkNormalTexture,
@@ -1756,6 +1756,25 @@ transformed.y += sin(uWindTime * 2.7 + position.x * 1.9 + foliageOrigin.z) * (uW
       if (treePositions.some(([tx, tz]) => Math.hypot(px - tx, pz - tz) < 3.6)) continue;
       palmPositions.push([px, pz, 0.85 + ((i * 11) % 35) / 100]);
     }
+
+    const dynamicColliders: SolidColliderDef[] = [];
+    treePositions.forEach(([tx, tz, s], idx) => {
+      dynamicColliders.push({
+        id: `jungle_tree_${idx}`,
+        x: tx,
+        z: tz,
+        radius: 1.15 * s,
+      });
+    });
+    palmPositions.forEach(([px, pz, s], idx) => {
+      dynamicColliders.push({
+        id: `palm_tree_${idx}`,
+        x: px,
+        z: pz,
+        radius: 0.9 * s,
+      });
+    });
+    registerDynamicObstacles(dynamicColliders);
 
     const palmTrunkParts: THREE.BufferGeometry[] = [];
     const segHeights = [1.8, 1.8, 1.7, 1.6];

@@ -19,15 +19,9 @@ import {
 import { OfflineIndicator } from './components/PWAControls';
 import { TutorialOverlay, TutorialProgress } from './components/TutorialOverlay';
 
-const ArtBibleView = lazy(() =>
-  import('./components/ArtBibleView').then((m) => ({ default: m.ArtBibleView }))
-);
-const CloudProfileModal = lazy(() =>
-  import('./components/CloudProfileModal').then((m) => ({ default: m.CloudProfileModal }))
-);
-const StoreReleaseModal = lazy(() =>
-  import('./components/StoreReleaseModal').then((m) => ({ default: m.StoreReleaseModal }))
-);
+import { ArtBibleView } from './components/ArtBibleView';
+import { CloudProfileModal } from './components/CloudProfileModal';
+import { StoreReleaseModal } from './components/StoreReleaseModal';
 import { auth, googleProvider } from './firebase';
 import { saveToCloud } from './game/cloudSync';
 import { hasSavedGame, loadGame, loadSettings, saveGame, saveSettings } from './game/saveSystem';
