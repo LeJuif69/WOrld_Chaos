@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Award,
   BookMarked,
+  Camera,
   CheckCircle2,
   Cloud,
   Cog,
@@ -551,6 +552,7 @@ export const PauseModal: React.FC<{
   onOpenCloud: () => void;
   onOpenArtBible: () => void;
   onOpenStoreKit: () => void;
+  onOpenPhoto: () => void;
   onOpenSettings: () => void;
   onTriggerChaos: (t: ChaosEventType) => void;
   onMainMenu: () => void;
@@ -560,6 +562,7 @@ export const PauseModal: React.FC<{
   onOpenCloud,
   onOpenArtBible,
   onOpenStoreKit,
+  onOpenPhoto,
   onOpenSettings,
   onTriggerChaos,
   onMainMenu,
@@ -583,6 +586,12 @@ export const PauseModal: React.FC<{
         className="min-h-[44px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#14B8A6]/45 text-[#F3F1E8] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
       >
         <Cloud className="w-4 h-4 text-[#14B8A6]" /> Sauvegarde Cloud &amp; Classement
+      </button>
+      <button
+        onClick={onOpenPhoto}
+        className="min-h-[44px] rounded-xl bg-[#0E1B15] hover:bg-[#162B22] border border-[#D4AF37]/45 text-[#F2CF66] font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <Camera className="w-4 h-4 text-[#D4AF37]" /> Mode Photo &amp; Panoramas
       </button>
       <button
         onClick={onOpenArtBible}

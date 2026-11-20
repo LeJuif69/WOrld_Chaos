@@ -10,7 +10,10 @@ export type ZoneId =
   | 'forgotten_temple'
   | 'chaos_zone'
   | 'boss_arena'
-  | 'secret_sanctuary';
+  | 'secret_sanctuary'
+  | 'volcanic_wasteland'
+  | 'magma_caldera'
+  | 'infernal_boss_arena';
 
 export type AbilityId = 'shockwave' | 'gravity_control' | 'chaos_shield';
 

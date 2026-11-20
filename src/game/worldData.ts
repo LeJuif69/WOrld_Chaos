@@ -120,6 +120,39 @@ export const ZONES: ZoneDef[] = [
     ambientMood: 'temple',
     description: 'A hidden emerald sanctuary sealed behind resonant crystal brambles.',
   },
+  {
+    id: 'volcanic_wasteland',
+    name: 'The Volcanic Wastes',
+    subtitle: 'Obsidian Cinders & Magma Rivers',
+    center: [0, -140],
+    radius: 30,
+    fogColor: '#3d120a',
+    skyColor: '#b45309',
+    ambientMood: 'chaos',
+    description: 'World 2 biome: Flowing rivers of molten lava, obsidian crags, and scorching ashstorms.',
+  },
+  {
+    id: 'magma_caldera',
+    name: 'Magma Caldera',
+    subtitle: 'Furnace of Pyros',
+    center: [0, -170],
+    radius: 28,
+    fogColor: '#450a0a',
+    skyColor: '#c2410c',
+    ambientMood: 'boss',
+    description: 'An unstable caldera where molten heat radiates across shattered basalt platforms.',
+  },
+  {
+    id: 'infernal_boss_arena',
+    name: 'Infernal Throne',
+    subtitle: 'Lair of Pyros Prime',
+    center: [0, -200],
+    radius: 32,
+    fogColor: '#2b0606',
+    skyColor: '#9a3412',
+    ambientMood: 'boss',
+    description: 'The volcanic sanctum guarded by Pyros Prime, ancient titan of magma and flame.',
+  },
 ];
 
 export const ITEMS: Record<string, InventoryItemDef> = {
@@ -205,6 +238,14 @@ export const ITEMS: Record<string, InventoryItemDef> = {
     description: 'Primary Chaos Core of World 1. Stabilizes The Lost Jungle and unlocks the path beyond.',
     usable: false,
     color: '#f43f5e',
+  },
+  chaos_core_volcano: {
+    id: 'chaos_core_volcano',
+    name: 'Volcanic Chaos Core',
+    category: 'chaos_core',
+    description: 'Primary Chaos Core of World 2. Stabilizes the Volcanic Wastes and quell Pyros Prime.',
+    usable: false,
+    color: '#ea580c',
   },
 };
 

@@ -21,6 +21,7 @@ import { TutorialOverlay, TutorialProgress } from './components/TutorialOverlay'
 
 import { ArtBibleView } from './components/ArtBibleView';
 import { CloudProfileModal } from './components/CloudProfileModal';
+import { PhotoModal } from './components/PhotoModal';
 import { StoreReleaseModal } from './components/StoreReleaseModal';
 import { auth, googleProvider } from './firebase';
 import { saveToCloud } from './game/cloudSync';
@@ -48,7 +49,8 @@ type ActiveModal =
   | 'exit'
   | 'art_bible'
   | 'cloud'
-  | 'store_kit';
+  | 'store_kit'
+  | 'photo';
 
 const INITIAL_HUD: HUDStateSnapshot = {
   screen: 'menu',
@@ -491,6 +493,7 @@ export default function App() {
             setHasSave(hasSavedGame());
           }}
           onOpenCloud={() => setActiveModal('cloud')}
+          onOpenPhoto={() => setActiveModal('photo')}
           onOpenArtBible={() => setActiveModal('art_bible')}
           onOpenStoreKit={() => setActiveModal('store_kit')}
           onOpenSettings={() => setActiveModal('settings')}
@@ -500,6 +503,15 @@ export default function App() {
             setHasSave(hasSavedGame());
             engineRef.current?.setScreenMode('menu');
           }}
+        />
+      )}
+
+      {activeModal === 'photo' && (
+        <PhotoModal
+          onCapture={(filter, dist, fov) =>
+            engineRef.current ? engineRef.current.capturePhotoSnapshot(filter, dist, fov) : null
+          }
+          onClose={() => setActiveModal('pause')}
         />
       )}
 

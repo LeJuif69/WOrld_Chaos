@@ -4979,4 +4979,22 @@ transformed.y += sin(uWindTime * 2.7 + position.x * 1.9 + foliageOrigin.z) * (uW
       return null;
     }
   }
+
+  public capturePhotoSnapshot(filter: string, distance: number, fov: number): string | null {
+    if (this.disposed || !this.renderer || !this.scene) return null;
+    try {
+      const prevFov = this.camera.fov;
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+
+      this.renderer.render(this.scene, this.camera);
+      const dataUrl = this.renderer.domElement.toDataURL('image/png');
+
+      this.camera.fov = prevFov;
+      this.camera.updateProjectionMatrix();
+      return dataUrl;
+    } catch {
+      return null;
+    }
+  }
 }
